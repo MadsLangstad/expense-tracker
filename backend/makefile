@@ -1,27 +1,38 @@
-FILE = fil
-
-INCLDIR = ./include
+# Compiler and flags
 CC = gcc
-CFLAGS = -O2 -Wextra
-CFLAGS += -I$(INCLDIR)
+CFLAGS = -I./include
+LDFLAGS = -L/usr/lib -lm
 
+# Directories
+SRCDIR = src
+INCDIR = include
 OBJDIR = obj
 
-_DEPS = $(FILE).h
-DEPS = $(patsubst %,$(INCLDIR)/%,$(_DEPS))
+# Source files
+SRCS = $(wildcard $(SRCDIR)/*.c)
 
-_OBJS = $(FILE).o
-OBJS = $(patsubst %,$(OBJDIR)/%,$(_OBJS))
+# Object files
+OBJS = $(patsubst $(SRCDIR)/%.c,$(OBJDIR)/%.o,$(SRCS))
 
-$(OBJDIR)/%.o: %.c $(DEPS)
-	$(CC) -c -o $@ $< $(CFLAGS)
+# Executable name
+EXEC = backend_app
 
-$(FILE): $(OBJS)
-	gcc -o $@ $^ $(CFLAGS)
+# Default target
+all: $(EXEC)
 
-$(SHA1): $(OBJS)
-	gcc -o $@ $^ $(CFLAGS)
+# Link object files to create the executable
+$(EXEC): $(OBJS)
+	$(CC) $(OBJS) -o $@ $(LDFLAGS)
 
-.PHONY: clean
+# Compile source files to object files
+$(OBJDIR)/%.o: $(SRCDIR)/%.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
+# Clean up object files and executable
 clean:
-	rm -f $(FILE) $(OBJDIR)/*.o *~ core $(INCLDIR)/*~
+	rm -f $(OBJDIR)/*.o $(EXEC)
+
+# Phony targets
+.PHONY: all clean
+
+
